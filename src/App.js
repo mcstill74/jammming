@@ -3,143 +3,111 @@ import './App.css';
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/SearchResults';
 import TrackList from './components/Tracklist';
-import {callSpotify} from './module/apiProcessing';
+import Playlist from './components/Playlist';
+import {callSpotify, callUpdateSpotify} from './module/apiProcessing';
 
 
 function App() {
   const [searchResults, setSearchResults] = useState([]);
+  const [track, setTrack] = useState({});
   const [trackList, setTrackList] = useState([]);
-   /* [
-    {
-        uri: 'lkjda3654',
-        externalId: 1,
-        name: "Give It Away",
-        artists: [
-          {
-            uri: 'kaldj',
-            profile: [{
-              name: "George Strait"
-            }]
-          }
-        ],
-        albumOfTrack: [
-          {
-            uri: 0,
-            name: "50 #1 Greatest Hits",
-            coverArt:{
-              sources: [
-                {
-                  url:"https://fakeurl.com",
-                  width:300,
-                  height:300
-                },
-                {
-                  url:"https://fakeurl2.com",
-                  width:300,
-                  height:300
-                },
-                {
-                  url:"https://fakeurl3.com",
-                  width:300,
-                  height:300
-                }
-              ]
-            }
-          },
-          {
-            uri: 0,
-            name: "Best Of (Deluxe Edition) testing ",
-            coverArt:{
-              sources: [
-                {
-                  url:"https://fakeurl.com",
-                  width:300,
-                  height:300
-                },
-                {
-                  url:"https://fakeurl2.com",
-                  width:300,
-                  height:300
-                },
-                {
-                  url:"https://fakeurl3.com",
-                  width:300,
-                  height:300
-                }
-              ]
-            }
-          }
+  const [playList, setPlaylist] = useState([]);
+  const [playListName, setPlayListName] = useState('');
 
-        ]
-          
-    },
-    {
-        uri: 'lkjda3642',
-        externalId: 2,
-        name: "All My Exs Live in Texas",
-        artists: [
-          {
-            uri: 'kaldj',
-            profile: [{
-              name: "George Strait"
-            }]
-          }
-        ],
-        albumOfTrack:[
-          { name: "50 #1 Greatest Hits"},
-          { name: "Strait From The Heart"}
-        ]
-    },
-    {
-        uri: 'lkjda3634',
-        externalId: 3,
-        name: "I Cross My Heart",
-        artists: [
-          {
-            uri: 'kaldj',
-            profile: [{
-              name: "George Strait"
-            }]
-          }
-        ],
-        albumOfTrack:[
-          { name: "50 #1 Greatest Hits"},
-          { name: "Strait From The Heart"}
-        ]
-    }
 
-] 
-);*/
-  
+
   function handleSearchSubmit(searchText, searchBy){
     if(searchText.length > 0 && searchBy.length > 0){
         //pass to api to search code
         console.log('Searching for: ' + searchText);
         console.log('Searching by: ' + searchBy);
-        const results = callSpotify(searchText, searchBy);
-        setTimeout( () => {
-          if(results.length > 0)
-            setSearchResults(results);
-          else
-            errorOnSearch();
-        }, 10000);
-        
+        Promise.all([callSpotify(searchText, searchBy)])
+        .then(onSuccessSearch)
+        .then(setSearchResults)
+        .catch(failureOnSearch);
+  
       }
     }
 
-  function errorOnSearch(){
+  function onSuccessSearch(result){
+    console.log('Result: '  + JSON.stringify(result));
+    let tracks = [];
+    for(let i =0; i< result[0].items.length; i++){
+    const trackObj = {
+        id: result[0].items[i].data.id,
+        uri:result[0].items[i].data.uri,
+        songName: result[0].items[i].data.name,
+        artist: result[0].items[i].data.artists.items[0].profile.name,
+        album:result[0].items[i].data.albumOfTrack.name
+    }
+    tracks.push(trackObj);
+    }
+    return tracks;
+  }
+
+  function failureOnSearch(error){
     alert('No Tracks found for that criteria.');
   }
   
-  function handleAddClick(e){
-    console.log('Add button clicked');
-    setTrackList( (trackList) => [e.target.value, ...trackList]);
+  function handleAddClick(){
+    console.log('Adding track to list' + track.id);
+    const iterator = searchResults.values();
+    for( const value of iterator){
+      if(value === track){
+        console.log('a match!');
+        setTrackList( (trackList) => [...trackList, track]);
+        setSearchResults(searchResults.filter( (item) => item !== value));
+        if(document.getElementById("save").checked === true)
+        {
+          setPlaylist( (playList) => [...playList, track]);
+        }
+        break;
+      }
+      else{
+        console.log('no match!');
+      }
+    }
+      
   }
 
-
-  function handleRemoveClick(e){
+  function handleRemoveClick(){
     console.log('Remove button clicked');
-    setTrackList( (trackList) => trackList.filter( (track) => track.key !== e.target.value.key));
+    setTrackList( (trackList) => trackList.filter( (item) => item !== track));
+    setSearchResults( (searchResults) => [...searchResults, track]);
+  }
+  
+  function onTrackClick(obj){
+    console.log('Track id: ' + obj.id);
+    setTrack(obj);
+  }
+
+  function handleAddToPlaylist(e){
+    console.log('add to playlist checked!');
+    if(e.target.checked === true ){
+      document.getElementById("playlist").hidden = false;
+      setPlaylist(trackList);
+    }
+    else{
+      document.getElementById("playlist").hidden = true;
+      setPlaylist([]);
+    }
+  }
+  function handlePlaylistNameChange(nameOfPlaylist){
+    setPlayListName(nameOfPlaylist);
+  }
+
+  function handleSaveToSpotify(){
+    Promise.all([callUpdateSpotify(playListName, playList)])
+    .then(onSuccessUpdate)
+    .catch(failureOnUpdate);
+  }
+
+  function onSuccessUpdate(){
+    alert(`Your ${playListName} playlist has been saved.`);
+  }
+
+  function failureOnUpdate(){
+    alert(`An issue is identified saving the playlist ${playListName}.`);
   }
 
   return (
@@ -156,7 +124,7 @@ function App() {
       <br></br>
       <div id="action">
         <div id="results">
-          <SearchResults data={searchResults} />
+          <SearchResults data={searchResults} onTrackClick={onTrackClick} />
         </div>
 
         <div id="buttons">
@@ -165,10 +133,21 @@ function App() {
           <button id="remove" onClick={handleRemoveClick}>Remove</button>
         </div>
 
-        <div id="tracks">
-          <TrackList list={trackList} />
-        </div>
 
+        <div id="tracks">
+          <div>
+              <input type="checkbox" name="save" id="save" onClick={handleAddToPlaylist} disabled={trackList.length === 0} />    
+              <label htmlFor="save">Add To Playlist</label>
+          </div>
+          <div>
+            <TrackList data={trackList} onTrackClick={onTrackClick} />
+          </div>
+            <br></br>
+        </div>
+        
+        <div id="playlist" hidden>
+          <Playlist data={playList} onChange={handlePlaylistNameChange} nameList={playListName} submit={handleSaveToSpotify}  />
+        </div>
       </div>
 
    </div>

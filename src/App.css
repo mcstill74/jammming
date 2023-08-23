@@ -45,12 +45,15 @@
 
 header{
   flex-direction: row;
-  align-self: center;
+  align-content: center;
   color: darkgreen;
 }
 
 #search{
   flex-direction:row;
+  font-size: large;
+  align-items: center;
+  justify-content: space-between;
   column-span: all;
 }
 
@@ -69,7 +72,7 @@ header{
   flex-direction: row;
   align-content: space-between;
   justify-content: flex-start;
-  padding:30px;
+  padding:20px;
 }
 #buttons{
   width:300px;
@@ -88,13 +91,9 @@ header{
 #button img{
   size: 200px;
 }
-#add:focus, 
-#remove:focus{
-  background-color: crimson;
-}
 
 #results{
-  margin: 10px;
+  margin: 5px;
   width:400px;
   height:100%;
   border: 4mm ridge rgba(203, 173, 222, .86);
@@ -106,7 +105,7 @@ header{
 
 li{
   width:300px;
-  height:100px;
+  height:200px;
   border: thick double purple;
   text-align: center;
   background-color: none;
@@ -117,7 +116,10 @@ li::selection{
 }
 
 #tracks{
-  margin: 10px;
+  display:flex;
+  flex-direction: column;
+
+  margin: 7px;
   width:400px;
   height:100%;
   border: 4mm ridge rgba(203, 173, 222, .86);
@@ -125,4 +127,12 @@ li::selection{
   justify-items: auto;
   background-color: whitesmoke;
   overflow: scroll;
+}
+
+#submit{
+  width: 200px;
+  height: 50px;
+  background-color: rgba(210, 165, 240, .86);
+  font-size: medium;
+  font-weight: bold;
 }

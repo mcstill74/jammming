@@ -1,3 +1,4 @@
+
 const options = {
     method: 'GET',
     headers: {
@@ -6,7 +7,7 @@ const options = {
     }
 };
 
-export async function callSpotify(searchText, searchBy){
+async function callSpotify(searchText, searchBy){
     //call api
     try{
         const url = 'https://spotify23.p.rapidapi.com/search/?q=' + searchText + '&type='+ searchBy + '&offset=0&limit=10&numberOfTopResults=5';
@@ -21,11 +22,11 @@ export async function callSpotify(searchText, searchBy){
             if(jsonResponse !== null){
                 switch(searchBy){
                     case 'tracks':
-                        return jsonResponse.tracks.items;
+                        return jsonResponse.tracks;
                     case 'albums':
-                        return jsonResponse.albums.items;
+                        return jsonResponse.albums;
                     case 'artists':
-                        return jsonResponse.artists.items;
+                        return jsonResponse.artists;
                     default:
                         alert('The search by criteria was not read.');
                         break;
@@ -36,7 +37,7 @@ export async function callSpotify(searchText, searchBy){
                 alert("No results for that search Request.");
             }
         }
-        throw new Error('request failed');
+        throw new Error('There is a problem sending the request.');
     }
     catch(error){
         console.error(error);
@@ -44,4 +45,15 @@ export async function callSpotify(searchText, searchBy){
                         
 }
 
+async function callUpdateSpotify(name, playlist){
+    try{
+        console.log('callUpdateSpotify was called with parameters passed ' + name + playlist);
+    }
+    catch(error){
+        console.error(error);
+    }
+
+}
+
+export {callSpotify, callUpdateSpotify};
 

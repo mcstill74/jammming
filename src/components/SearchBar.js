@@ -28,7 +28,6 @@ function SearchBar(props){
             <select id="searchBy" name="Search By" value={searchBy} onChange={handleSearchBySelection}>
                 <option value='tracks'>Tracks</option>
             </select>
-
             <label name="searchText" htmlFor="searchText">Search</label>
             <input id="searchText" type="text" name="searchText" minLength="3" value={searchText} onChange={handleTextChange} />
             <button type="submit">Search</button></span>
