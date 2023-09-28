@@ -1,12 +1,11 @@
 .App {
-  text-align: center;
   display:flex;
   flex-direction: column;
-  align-content: center;
-  background-image: url("../public/background.jpeg");
-  background-size: cover;
+  background: linear-gradient(to bottom right, blue, pink );
+  background-size: 95%;
   position:relative;
 }
+
 
 .App-logo {
   height: 40vmin;
@@ -19,19 +18,22 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
+.app-header {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  
   font-size: calc(10px + 2vmin);
   color: white;
 }
 
 .App-link {
   color: #61dafb;
+}
+
+.diagonal-gradient {
+  background: linear-gradient(to bottom right, blue, pink);
 }
 
 @keyframes App-logo-spin {
@@ -43,96 +45,178 @@
   }
 }
 
-header{
+#app{
+  width:100%;
+  height: auto;
+  display:flex;
   flex-direction: row;
+  justify-items: center;
+  background: linear-gradient(to bottom right, blue, pink );
+  background-size: 100%;
+  position:relative;
+  overflow: auto;
+  flex-wrap: wrap;
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+
+}
+
+header{
+  margin-left: 50%;
+  flex-direction: column;
+  justify-content: center;
+  color: hotpink;
+  text-shadow: 1px 1px 2px red, 0 0 1em blue, 0 0 0.2em blue;
+  text-decoration: none;
+}
+
+header:hover{
+  color:black;
+  font-weight: bolder;
+  text-decoration: double;
+  text-shadow: none;
+}
+
+#loginDiv{
+  display:flex;
+  flex-direction: column;
+  margin-top: 50px;
+  margin-left: 45%;
+  width: 300px;
+  height: 200px;
   align-content: center;
-  color: darkgreen;
+  align-items: center;
+  column-span: all;
 }
 
 #search{
   flex-direction:row;
+  width:100%;
+  margin: auto;
+  height:auto;
   font-size: large;
-  align-items: center;
-  justify-content: space-between;
-  column-span: all;
+  align-content: center;
 }
 
 #searchBy{
-  border-radius: 5px;
-  size: 300px;
+  font-size: 18px;
+  font-weight: bold;
+  border:  5px ridge rgba(210, 165, 240, .86);
+  border-radius: 10px;
+  padding: 10px;
+  background-color: black;
+  color:white;
+
+}
+
+option{
+ font-size:18px;
+ font-weight:bold;
 }
 
 #searchText{
-  border-radius: 5px;
-  size: 300px;
+  padding: 10px;
+  width: 500px;
+  border: 5px ridge rgba(210, 165, 240, .86);
+  border-radius: 10px;
+  background-color: black;
+  color:white;
 }
 
-#action{
+#searchBy:hover,
+#searchText:hover{
+  border: thick ridge rgba(210, 165, 240, .86);
+  border-radius: 20px;
+}
+
+#searchBtn{
+  width: fit-content;
+  height: 50px;
+  background-color: rgba(210, 165, 240, .86);
+  font-size: medium;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 20px;
+}
+
+#searchBtn:hover{
+  border: thick ridge black;
+  border-radius: 10px;
+}
+
+
+#lists{
   display:flex;
   flex-direction: row;
-  align-content: space-between;
-  justify-content: flex-start;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-content: center;
   padding:20px;
 }
-#buttons{
-  width:300px;
-  height:500px;
-  justify-content: space-around;
-  align-items: center;
-  padding-left: 100px;
-}
-#add, #remove{
-  width: 200px;
+
+#saveToSpotify{
+  width: 175px;
   height: 50px;
   background-color: rgba(210, 165, 240, .86);
   font-size: medium;
   font-weight: bold;
-}
-#button img{
-  size: 200px;
-}
-
-#results{
-  margin: 5px;
-  width:400px;
-  height:100%;
-  border: 4mm ridge rgba(203, 173, 222, .86);
-  align-items: baseline;
-  justify-items: auto;
-  background-color: whitesmoke;
-  overflow: scroll;
-}
-
-li{
-  width:300px;
-  height:200px;
-  border: thick double purple;
   text-align: center;
-  background-color: none;
 }
 
-li::selection{
-  background-color: aquamarine;
+#trackListSave{
+  display:block;
+}
+#trackListBtns{
+  display: block;
+}
+.PlayList,
+.Results
+{
+  margin: 5px;
+  width: 400px;
+  height:auto;
+  border: 5px ridge rgba(203, 173, 222, .86);
+  align-items: flex-start;
+  overflow: none;
+  list-style: none;
+  background-color: black;
 }
 
-#tracks{
-  display:flex;
-  flex-direction: column;
-
-  margin: 7px;
-  width:400px;
-  height:100%;
-  border: 4mm ridge rgba(203, 173, 222, .86);
-  align-content: center;
-  justify-items: auto;
-  background-color: whitesmoke;
-  overflow: scroll;
-}
-
-#submit{
-  width: 200px;
-  height: 50px;
-  background-color: rgba(210, 165, 240, .86);
-  font-size: medium;
+#songName{
+  font-size: 16px;
   font-weight: bold;
+  color:rgba(210, 165, 240, .86);
+}
+#albumartistName{
+  font-size: 10px;
+  font-weight: lighter;
+  color:white;
+}
+
+#playname{
+  font-size: 14px;
+  font-weight: lighter;
+  color:white;
+
+}
+
+
+#add, #remove{
+  padding-right: 1em;
+  float:left;
+  align-self: center;
+  background-color: pink;
+  font-weight: bolder;
+  font-size: large;
+}
+
+.playlistName{
+  margin: 5px;
+  width:200px;
+  align-self: baseline;
+  background: transparent;
+  border: none;
+  font-size:24px;
+  font-weight:bold; 
+  color:black;
+  border-bottom: 1px solid #000000;
 }

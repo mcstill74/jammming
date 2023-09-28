@@ -1,158 +1,101 @@
-import {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import './App.css';
-import SearchBar from './components/SearchBar';
+import SearchBar from './components/SearchBar.jsx';
 import SearchResults from './components/SearchResults';
-import TrackList from './components/Tracklist';
 import Playlist from './components/Playlist';
-import {callSpotify, callUpdateSpotify} from './module/apiProcessing';
+import {searchForTracks, createPlayList} from './utils/apiProcessing';
+import UserLogin from './components/UserLogin';
 
 
-function App() {
+function App(){
+  const [loggedIn, setLoggedIn] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
-  const [track, setTrack] = useState({});
-  const [trackList, setTrackList] = useState([]);
-  const [playList, setPlaylist] = useState([]);
-  const [playListName, setPlayListName] = useState('');
-
-
-
-  function handleSearchSubmit(searchText, searchBy){
-    if(searchText.length > 0 && searchBy.length > 0){
-        //pass to api to search code
-        console.log('Searching for: ' + searchText);
-        console.log('Searching by: ' + searchBy);
-        Promise.all([callSpotify(searchText, searchBy)])
-        .then(onSuccessSearch)
-        .then(setSearchResults)
-        .catch(failureOnSearch);
+  const [playListTracks, setPlayListTracks] = useState([]);
+  const [playlistName, setPlaylistName] = useState('');
   
-      }
-    }
 
-  function onSuccessSearch(result){
-    console.log('Result: '  + JSON.stringify(result));
-    let tracks = [];
-    for(let i =0; i< result[0].items.length; i++){
-    const trackObj = {
-        id: result[0].items[i].data.id,
-        uri:result[0].items[i].data.uri,
-        songName: result[0].items[i].data.name,
-        artist: result[0].items[i].data.artists.items[0].profile.name,
-        album:result[0].items[i].data.albumOfTrack.name
-    }
-    tracks.push(trackObj);
-    }
-    return tracks;
-  }
+
+  function handleLogin(loggedIn){
+      setLoggedIn(loggedIn);
+  };
+
+  const search = useCallback((searchText, searchBy )=>{
+    searchForTracks(searchText, searchBy)
+    .then( (response) => {setSearchResults(response)})
+    .catch(failureOnSearch);
+  }, []);
+
 
   function failureOnSearch(error){
-    alert('No Tracks found for that criteria.');
+    alert('No Tracks found for that criteria. ' + error);
   }
-  
-  function handleAddClick(){
-    console.log('Adding track to list' + track.id);
-    const iterator = searchResults.values();
-    for( const value of iterator){
-      if(value === track){
-        console.log('a match!');
-        setTrackList( (trackList) => [...trackList, track]);
-        setSearchResults(searchResults.filter( (item) => item !== value));
-        if(document.getElementById("save").checked === true)
-        {
-          setPlaylist( (playList) => [...playList, track]);
-        }
-        break;
+
+  //Set Tracklist when selecting add button in search results list
+  function onAddTrackClick(id){
+    console.log('Event track id: ' + id);
+      let trackIndex = searchResults.findIndex((result) => result.id === id);
+      if(trackIndex !== undefined ){
+        setPlayListTracks( [...playListTracks, searchResults[trackIndex]]);
+        setSearchResults(searchResults.filter( (track) => track.id !== id) );
       }
       else{
-        console.log('no match!');
+        alert(`Track isn't found.`);
       }
-    }
-      
+  }
+    //Remove track from track list  and remove from track list back to search results list
+    function onRemoveTrackClick(id){
+      if(id !== undefined ){
+        setPlayListTracks(playListTracks.filter( (track) => track.id !== id) );  
+      }
+      else{
+        alert(`Track isn't found.`);
+      }
+
   }
 
-  function handleRemoveClick(){
-    console.log('Remove button clicked');
-    setTrackList( (trackList) => trackList.filter( (item) => item !== track));
-    setSearchResults( (searchResults) => [...searchResults, track]);
-  }
-  
-  function onTrackClick(obj){
-    console.log('Track id: ' + obj.id);
-    setTrack(obj);
+  const updatePlaylistName = useCallback((name) => {
+    setPlaylistName(name);
+  }, []);
+
+  function saveToSpotify(){
+    createPlayList(playListTracks, playlistName)
+    .then(onPlaylistSuccess)
+    .catch(failureOnSave);
   }
 
-  function handleAddToPlaylist(e){
-    console.log('add to playlist checked!');
-    if(e.target.checked === true ){
-      document.getElementById("playlist").hidden = false;
-      setPlaylist(trackList);
-    }
-    else{
-      document.getElementById("playlist").hidden = true;
-      setPlaylist([]);
-    }
-  }
-  function handlePlaylistNameChange(nameOfPlaylist){
-    setPlayListName(nameOfPlaylist);
+  function onPlaylistSuccess(){
+    alert('Saved playlist. ' + playlistName);
   }
 
-  function handleSaveToSpotify(){
-    Promise.all([callUpdateSpotify(playListName, playList)])
-    .then(onSuccessUpdate)
-    .catch(failureOnUpdate);
+  function failureOnSave(error){
+    alert('Unable to save playlist. ' + error);
   }
 
-  function onSuccessUpdate(){
-    alert(`Your ${playListName} playlist has been saved.`);
-  }
-
-  function failureOnUpdate(){
-    alert(`An issue is identified saving the playlist ${playListName}.`);
-  }
 
   return (
-    <div>
-      <header>
-        <h1>Jammming</h1>
-      </header>
+      <>
+        <header>
+          <h1>Jammming</h1>
+        </header>
+        <div>
+          {!loggedIn && <div id="loginDiv">
+            <UserLogin onLogIn={handleLogin} />
+          </div> }
+          {loggedIn && <div id="search">
+            <section>
+                <h2>Search for Tracks</h2>
+                <SearchBar onSearch={search} /> 
+            </section>
+            <section id='lists'>
+                <SearchResults tracks={searchResults} onAdd={onAddTrackClick} /> 
+                <Playlist tracks={playListTracks} name={playlistName} 
+                        onNameUpdate={updatePlaylistName} onRemoveTrack={onRemoveTrackClick}
+                        onSave={saveToSpotify} />
 
-      <div id="search">
-        <h1>Search for your song</h1>
-        <SearchBar search={handleSearchSubmit} />
-      </div>
-      <br></br>
-      <br></br>
-      <div id="action">
-        <div id="results">
-          <SearchResults data={searchResults} onTrackClick={onTrackClick} />
+            </section>
+            </div>}
         </div>
-
-        <div id="buttons">
-          <button id="add" onClick={handleAddClick}>Add</button>
-          <br></br>
-          <button id="remove" onClick={handleRemoveClick}>Remove</button>
-        </div>
-
-
-        <div id="tracks">
-          <div>
-              <input type="checkbox" name="save" id="save" onClick={handleAddToPlaylist} disabled={trackList.length === 0} />    
-              <label htmlFor="save">Add To Playlist</label>
-          </div>
-          <div>
-            <TrackList data={trackList} onTrackClick={onTrackClick} />
-          </div>
-            <br></br>
-        </div>
-        
-        <div id="playlist" hidden>
-          <Playlist data={playList} onChange={handlePlaylistNameChange} nameList={playListName} submit={handleSaveToSpotify}  />
-        </div>
-      </div>
-
-   </div>
-
+      </>
   );
 }
-
 export default App;
